@@ -1,0 +1,182 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+class MidtermAnimal {
+    private String name;
+    private int age;
+    private String sex;
+    private String species;
+    private String color;
+    private int weight;
+    private String origin;
+    private String habitat;
+
+    public MidtermAnimal(String name, int age, String sex, String species, String color, int weight, String origin) {
+        this.name = name;
+        this.age = age;
+        this.sex = sex;
+        this.species = species;
+        this.color = color;
+        this.weight = weight;
+        this.origin = origin;
+        this.habitat = "";
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public String getSex() {
+        return sex;
+    }
+
+    public String getSpecies() {
+        return species;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public String getHabitat() {
+        return habitat;
+    }
+
+    public void setHabitat(String habitat) {
+        this.habitat = habitat;
+    }
+
+    @Override
+    public String toString() {
+        return "Name: " + name + "\nAge: " + age + "\nSex: " + sex + "\nSpecies: " + species + "\nColor: " + color +
+                "\nWeight: " + weight + " pounds\nOrigin: " + origin + "\nHabitat: " + habitat + "\n";
+    }
+}
+
+public class MidtermAnimal {
+    private static final String ANIMAL_NAMES_FILE = "C:\\Users\\augus\\Desktop\\School\\CIT-63\\Midterm\\animalNames.txt";
+    private static final String INPUT_FILE = "C:\\Users\\augus\\Desktop\\School\\CIT-63\\Midterm\\arrivingAnimals.txt";
+    private static final String OUTPUT_FILE = "C:\\Users\\augus\\Desktop\\School\\CIT-63\\Midterm\\zooPopulation.txt";
+
+    private static List<String> animalNames;
+
+    public static void main(String[] args) {
+        animalNames = loadAnimalNames();
+
+        List<Animal> animals = readAnimalsFromFile();
+        assignBirthdays(animals);
+        assignUniqueIDs(animals);
+        assignNames(animals);
+        assignHabitats(animals);
+        writeOutputToFile(animals);
+    }
+
+    private static List<String> loadAnimalNames() {
+        List<String> names = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(ANIMAL_NAMES_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                names.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return names;
+    }
+
+    private static List<Animal> readAnimalsFromFile() {
+        List<Animal> animals = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(INPUT_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Animal animal = createAnimalFromInput(line);
+                animals.add(animal);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return animals;
+    }
+
+    private static Animal createAnimalFromInput(String input) {
+        String[] parts = input.split(",");
+        String[] attributes = parts[0].trim().split(" ");
+
+        int age = Integer.parseInt(attributes[0]);
+        String sex = attributes[2];
+        String species = attributes[3];
+        String color = parts[2].trim();
+        int weight = Integer.parseInt(parts[3].trim().split(" ")[0]);
+        String origin = parts[4].trim();
+
+        return new Animal("", age, sex, species, color, weight, origin);
+    }
+
+    private static void assignBirthdays(List<Animal> animals) {
+        Random random = new Random();
+        for (Animal animal : animals) {
+            int year = random.nextInt(10) + 2010; // Random year between 2010 and 2019
+            animal.setHabitat(year + "");
+        }
+    }
+
+    private static void assignUniqueIDs(List<Animal> animals) {
+        for (Animal animal : animals) {
+            String uniqueID = generateUniqueID();
+            animal.setHabitat(animal.getHabitat() + "-" + uniqueID);
+        }
+    }
+
+    private static String generateUniqueID() {
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 5; i++) {
+            int digit = random.nextInt(10);
+            sb.append(digit);
+        }
+        return sb.toString();
+    }
+
+    private static void assignNames(List<Animal> animals) {
+        int nameIndex = 0;
+        for (Animal animal : animals) {
+            String name = animalNames.get(nameIndex % animalNames.size());
+            nameIndex++;
+            animal.setName(name);
+        }
+    }
+
+    private static void assignHabitats(List<Animal> animals) {
+        for (Animal animal : animals) {
+            animal.setHabitat(animal.getSpecies() + " Habitat");
+        }
+    }
+
+    private static void writeOutputToFile(List<Animal> animals) {
+        try (FileWriter writer = new FileWriter(OUTPUT_FILE)) {
+            for (Animal animal : animals) {
+                writer.write(animal.toString());
+                writer.write("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
